@@ -15,3 +15,24 @@ resource "synology_volume" "volume2" {
   # Optional: Specify storage pool if you have multiple pools
   # storage_pool = "default"
 }
+
+resource "synology_folder" "downloads" {
+  name   = "downloads"
+  path   = "/volume2/downloads"
+  
+  depends_on = [synology_volume.volume2]
+}
+
+resource "synology_folder" "downloads_complete" {
+  name   = "complete"
+  path   = "/volume2/downloads/complete"
+  
+  depends_on = [synology_folder.downloads]
+}
+
+resource "synology_folder" "downloads_incomplete" {
+  name   = "incomplete"
+  path   = "/volume2/downloads/incomplete"
+  
+  depends_on = [synology_folder.downloads]
+}
