@@ -1,14 +1,16 @@
+# Create volume2 for storing downloads and media files
+# This volume uses Btrfs filesystem with SHR for redundancy
 resource "synology_volume" "volume2" {
   name        = "volume2"
-  location    = "/volume2"
-  file_system = "btrfs"
+  location    = "/volume2"     # Mount point on the NAS
+  file_system = "btrfs"        # Modern filesystem with snapshot support
   
-  # Use 95% of available storage pool space
+  # Allocation settings - use most of the available space
   allocation_type = "allocate_percentage"
-  size_percentage = 95
+  size_percentage = 95         # Reserve 5% for system overhead
   
-  # Set RAID type to SHR (Synology Hybrid RAID)
-  raid_type = "shr"
+  # RAID configuration for data protection
+  raid_type = "shr"           # Synology Hybrid RAID for flexibility
   
   # Optional: Specify storage pool if you have multiple pools
   # storage_pool = "default"
