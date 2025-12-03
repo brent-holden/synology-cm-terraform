@@ -3,13 +3,6 @@ resource "synology_container_project" "radarr" {
   name = "radarr"
   run  = true
 
-  # Named volumes for persistent data
-  volumes = {
-    radarr-config    = {}
-    radarr-movies    = {}
-    radarr-downloads = {}
-  }
-
   services = {
     radarr = {
       image          = "docker.io/linuxserver/radarr:latest"
@@ -39,20 +32,20 @@ resource "synology_container_project" "radarr" {
       volumes = [
         {
           # Configuration files (persistent across container restarts)
-          type   = "volume"
-          source = "radarr-config"
+          type   = "bind"
+          source = "/volume1/docker/radarr/config"
           target = "/config"
         },
         {
           # Movies library directory
-          type   = "volume"
-          source = "radarr-movies"
+          type   = "bind"
+          source = "/volume1/media/movies"
           target = "/movies"
         },
         {
           # Completed downloads directory
-          type   = "volume"
-          source = "radarr-downloads"
+          type   = "bind"
+          source = "/volume1/media/downloads/complete/movies"
           target = "/downloads"
         }
       ]

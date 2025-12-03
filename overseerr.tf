@@ -3,11 +3,6 @@ resource "synology_container_project" "overseerr" {
   name = "overseerr"
   run  = true
 
-  # Named volumes for persistent data
-  volumes = {
-    overseerr-config = {}
-  }
-
   services = {
     overseerr = {
       image          = "docker.io/linuxserver/overseerr:latest"
@@ -37,8 +32,8 @@ resource "synology_container_project" "overseerr" {
       volumes = [
         {
           # Configuration files (persistent across container restarts)
-          type   = "volume"
-          source = "overseerr-config"
+          type   = "bind"
+          source = "/volume1/docker/overseerr/config"
           target = "/config"
         }
       ]

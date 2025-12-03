@@ -4,13 +4,6 @@ resource "synology_container_project" "sabnzbd" {
   name = "sabnzbd"
   run  = true
 
-  # Named volumes for persistent data
-  volumes = {
-    sabnzbd-config              = {}
-    sabnzbd-incomplete-downloads = {}
-    sabnzbd-downloads           = {}
-  }
-
   services = {
     sabnzbd = {
       image          = "docker.io/linuxserver/sabnzbd:latest"
@@ -40,20 +33,20 @@ resource "synology_container_project" "sabnzbd" {
       volumes = [
         {
           # Configuration files (persistent across container restarts)
-          type   = "volume"
-          source = "sabnzbd-config"
+          type   = "bind"
+          source = "/volume1/docker/sabnzbd/config"
           target = "/config"
         },
         {
           # Incomplete downloads directory
-          type   = "volume"
-          source = "sabnzbd-incomplete-downloads"
+          type   = "bind"
+          source = "/volume1/media/downloads/incomplete"
           target = "/incomplete-downloads"
         },
         {
           # Completed downloads directory
-          type   = "volume"
-          source = "sabnzbd-downloads"
+          type   = "bind"
+          source = "/volume1/media/downloads/complete"
           target = "/downloads"
         }
       ]

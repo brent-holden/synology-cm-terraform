@@ -3,11 +3,6 @@ resource "synology_container_project" "prowlarr" {
   name = "prowlarr"
   run  = true
 
-  # Named volumes for persistent data
-  volumes = {
-    prowlarr-config = {}
-  }
-
   services = {
     prowlarr = {
       image          = "docker.io/linuxserver/prowlarr:latest"
@@ -37,8 +32,8 @@ resource "synology_container_project" "prowlarr" {
       volumes = [
         {
           # Configuration files (persistent across container restarts)
-          type   = "volume"
-          source = "prowlarr-config"
+          type   = "bind"
+          source = "/volume1/docker/prowlarr/config"
           target = "/config"
         }
       ]

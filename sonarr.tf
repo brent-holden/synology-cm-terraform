@@ -3,13 +3,6 @@ resource "synology_container_project" "sonarr" {
   name = "sonarr"
   run  = true
 
-  # Named volumes for persistent data
-  volumes = {
-    sonarr-config    = {}
-    sonarr-tv        = {}
-    sonarr-downloads = {}
-  }
-
   services = {
     sonarr = {
       image          = "docker.io/linuxserver/sonarr:latest"
@@ -39,20 +32,20 @@ resource "synology_container_project" "sonarr" {
       volumes = [
         {
           # Configuration files (persistent across container restarts)
-          type   = "volume"
-          source = "sonarr-config"
+          type   = "bind"
+          source = "/volume1/docker/sonarr/config"
           target = "/config"
         },
         {
           # TV library directory
-          type   = "volume"
-          source = "sonarr-tv"
+          type   = "bind"
+          source = "/volume1/media/tv"
           target = "/tv"
         },
         {
           # Completed downloads directory
-          type   = "volume"
-          source = "sonarr-downloads"
+          type   = "bind"
+          source = "/volume1/media/downloads/complete/tv"
           target = "/downloads"
         }
       ]

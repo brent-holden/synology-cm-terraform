@@ -1,3 +1,4 @@
+# Netvisor - Network monitoring stack
 resource "synology_container_project" "netvisor" {
   name = "netvisor"
   run  = true
@@ -15,13 +16,6 @@ resource "synology_container_project" "netvisor" {
         ]
       }
     }
-  }
-
-  # Named volumes for persistent data
-  volumes = {
-    postgres_data = {}
-    daemon-config = {}
-    server-data   = {}
   }
 
   services = {
@@ -62,15 +56,15 @@ resource "synology_container_project" "netvisor" {
 
       volumes = [
         {
-          type   = "volume"
-          source = "daemon-config"
+          type   = "bind"
+          source = "/volume1/docker/netvisor/daemon"
           target = "/root/.config/daemon"
         },
         {
           # Docker socket for container discovery
-          type   = "bind"
-          source = "/var/run/docker.sock"
-          target = "/var/run/docker.sock"
+          type      = "bind"
+          source    = "/var/run/docker.sock"
+          target    = "/var/run/docker.sock"
           read_only = true
         }
       ]
@@ -85,7 +79,7 @@ resource "synology_container_project" "netvisor" {
       environment = {
         POSTGRES_DB       = "netvisor"
         POSTGRES_USER     = "postgres"
-        POSTGRES_PASSWORD = "password"  # Change this to a secure password
+        POSTGRES_PASSWORD = "password" # Change this to a secure password
       }
 
       healthcheck = {
@@ -101,8 +95,8 @@ resource "synology_container_project" "netvisor" {
 
       volumes = [
         {
-          type   = "volume"
-          source = "postgres_data"
+          type   = "bind"
+          source = "/volume1/docker/netvisor/postgres"
           target = "/var/lib/postgresql/data"
         }
       ]
@@ -123,12 +117,12 @@ resource "synology_container_project" "netvisor" {
       ]
 
       environment = {
-        NETVISOR_LOG_LEVEL           = "info"
-        NETVISOR_SERVER_PORT         = "60072"
-        NETVISOR_DAEMON_PORT         = "60073"
-        NETVISOR_DATABASE_URL        = "postgresql://postgres:password@postgres:5432/netvisor"
-        NETVISOR_WEB_EXTERNAL_PATH   = "/app/static"
-        NETVISOR_PUBLIC_URL          = "http://localhost:60072"
+        NETVISOR_LOG_LEVEL             = "info"
+        NETVISOR_SERVER_PORT           = "60072"
+        NETVISOR_DAEMON_PORT           = "60073"
+        NETVISOR_DATABASE_URL          = "postgresql://postgres:password@postgres:5432/netvisor"
+        NETVISOR_WEB_EXTERNAL_PATH     = "/app/static"
+        NETVISOR_PUBLIC_URL            = "http://localhost:60072"
         NETVISOR_INTEGRATED_DAEMON_URL = "http://172.17.0.1:60073"
       }
 
@@ -147,8 +141,8 @@ resource "synology_container_project" "netvisor" {
 
       volumes = [
         {
-          type   = "volume"
-          source = "server-data"
+          type   = "bind"
+          source = "/volume1/docker/netvisor/server"
           target = "/data"
         }
       ]
