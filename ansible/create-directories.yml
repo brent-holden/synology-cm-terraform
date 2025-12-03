@@ -1,15 +1,17 @@
 ---
-# Ansible playbook to create required directories for Synology Container Manager
+# Ansible playbook to set up users and directories for Synology Container Manager
 # Run with: ansible-playbook -i inventory.yml create-directories.yml
 
-- name: Create directories for Docker containers on Synology NAS
+- name: Set up users and directories for Docker containers on Synology NAS
   hosts: synology
   become: true
 
   vars:
     # User/group for directory ownership (match PUID/PGID in Terraform configs)
-    docker_uid: 1027
-    docker_gid: 100
+    plex_user: plex
+    plex_uid: 1027
+    media_group: media
+    media_gid: 100
 
     # Base paths
     docker_base: /volume1/docker
@@ -36,12 +38,35 @@
       - "{{ media_base }}/downloads/complete/tv"
 
   tasks:
+    # User and group setup (must happen before directory creation)
+    - name: Create media group
+      ansible.builtin.group:
+        name: "{{ media_group }}"
+        gid: "{{ media_gid }}"
+        state: present
+
+    - name: Create plex user
+      ansible.builtin.user:
+        name: "{{ plex_user }}"
+        uid: "{{ plex_uid }}"
+        group: "{{ media_group }}"
+        groups:
+          - "{{ media_group }}"
+          - docker
+          - users
+        append: false
+        shell: /sbin/nologin
+        create_home: false
+        system: true
+        state: present
+
+    # Directory creation (happens after user/group setup)
     - name: Create container config directories
       ansible.builtin.file:
         path: "{{ item }}"
         state: directory
-        owner: "{{ docker_uid }}"
-        group: "{{ docker_gid }}"
+        owner: "{{ plex_user }}"
+        group: "{{ media_group }}"
         mode: "0755"
       loop: "{{ container_config_dirs }}"
 
@@ -49,14 +74,17 @@
       ansible.builtin.file:
         path: "{{ item }}"
         state: directory
-        owner: "{{ docker_uid }}"
-        group: "{{ docker_gid }}"
+        owner: "{{ plex_user }}"
+        group: "{{ media_group }}"
         mode: "0755"
       loop: "{{ media_dirs }}"
 
     - name: Display summary
       ansible.builtin.debug:
         msg: |
+          Created group '{{ media_group }}' with GID {{ media_gid }}
+          Created user '{{ plex_user }}' with UID {{ plex_uid }} (no interactive login)
+          User '{{ plex_user }}' is a member of groups: {{ media_group }}, docker, users
           Created {{ container_config_dirs | length }} container config directories
           Created {{ media_dirs | length }} media directories
-          All directories owned by UID:{{ docker_uid }} GID:{{ docker_gid }}
+          All directories owned by {{ plex_user }}:{{ media_group }}
