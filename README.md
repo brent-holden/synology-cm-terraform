@@ -76,13 +76,34 @@ terraform init
 terraform plan
 ```
 
-### 6. Apply the Configuration
+### 6. Create Required Directories
+
+SSH into your Synology NAS and create the necessary directories before deploying:
+
+```bash
+# Config directories
+mkdir -p /volume1/docker/sabnzbd/config
+mkdir -p /volume1/docker/radarr/config
+mkdir -p /volume1/docker/sonarr/config
+mkdir -p /volume1/docker/prowlarr/config
+mkdir -p /volume1/docker/overseerr/config
+mkdir -p /volume1/docker/netvisor/daemon
+mkdir -p /volume1/docker/netvisor/server
+mkdir -p /volume1/docker/netvisor/postgres
+
+# Media directories
+mkdir -p /volume1/media/downloads/incomplete
+mkdir -p /volume1/media/downloads/complete/movies
+mkdir -p /volume1/media/downloads/complete/tv
+mkdir -p /volume1/media/movies
+mkdir -p /volume1/media/tv
+```
+
+### 7. Apply the Configuration
 
 ```bash
 terraform apply
 ```
-
-All containers use Docker named volumes for persistent storage, which are created automatically - no manual directory creation is required.
 
 ## Configuration
 
@@ -97,7 +118,7 @@ Adjust these values in each `.tf` file to match your Synology user/group IDs.
 
 ### Volume Mappings
 
-All containers use Docker named volumes for persistent storage. Volumes are defined at the project level and automatically created by Docker when the containers start. This eliminates the need to manually create directories on the NAS before deployment.
+All containers use bind mounts for persistent storage. The directories must exist on the NAS before deploying the containers.
 
 ## Services
 
