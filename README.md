@@ -78,10 +78,10 @@ terraform plan
 
 ### 6. Create Required Directories
 
-SSH into your Synology NAS and create the necessary directories before deploying:
+SSH into your Synology NAS and create the required directories before deploying. All containers use bind mounts, so these directories must exist.
 
 ```bash
-# Config directories
+# Container config directories
 mkdir -p /volume1/docker/sabnzbd/config
 mkdir -p /volume1/docker/radarr/config
 mkdir -p /volume1/docker/sonarr/config
@@ -92,12 +92,30 @@ mkdir -p /volume1/docker/netvisor/server
 mkdir -p /volume1/docker/netvisor/postgres
 
 # Media directories
-mkdir -p /volume1/media/downloads/incomplete
-mkdir -p /volume1/media/downloads/complete/movies
-mkdir -p /volume1/media/downloads/complete/tv
 mkdir -p /volume1/media/movies
 mkdir -p /volume1/media/tv
+mkdir -p /volume1/media/downloads/incomplete
+mkdir -p /volume1/media/downloads/complete
+mkdir -p /volume1/media/downloads/complete/movies
+mkdir -p /volume1/media/downloads/complete/tv
 ```
+
+| Directory | Used By | Purpose |
+|-----------|---------|---------|
+| `/volume1/docker/sabnzbd/config` | SABnzbd | Application configuration |
+| `/volume1/docker/radarr/config` | Radarr | Application configuration |
+| `/volume1/docker/sonarr/config` | Sonarr | Application configuration |
+| `/volume1/docker/prowlarr/config` | Prowlarr | Application configuration |
+| `/volume1/docker/overseerr/config` | Overseerr | Application configuration |
+| `/volume1/docker/netvisor/daemon` | Netvisor Daemon | Daemon configuration |
+| `/volume1/docker/netvisor/server` | Netvisor Server | Server data |
+| `/volume1/docker/netvisor/postgres` | Netvisor PostgreSQL | Database files |
+| `/volume1/media/movies` | Radarr | Movie library |
+| `/volume1/media/tv` | Sonarr | TV series library |
+| `/volume1/media/downloads/incomplete` | SABnzbd | In-progress downloads |
+| `/volume1/media/downloads/complete` | SABnzbd | Completed downloads |
+| `/volume1/media/downloads/complete/movies` | Radarr | Completed movie downloads |
+| `/volume1/media/downloads/complete/tv` | Sonarr | Completed TV downloads |
 
 ### 7. Apply the Configuration
 
