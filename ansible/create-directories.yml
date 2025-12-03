@@ -1,0 +1,62 @@
+---
+# Ansible playbook to create required directories for Synology Container Manager
+# Run with: ansible-playbook -i inventory.yml create-directories.yml
+
+- name: Create directories for Docker containers on Synology NAS
+  hosts: synology
+  become: true
+
+  vars:
+    # User/group for directory ownership (match PUID/PGID in Terraform configs)
+    docker_uid: 1027
+    docker_gid: 100
+
+    # Base paths
+    docker_base: /volume1/docker
+    media_base: /volume1/media
+
+    # Container config directories
+    container_config_dirs:
+      - "{{ docker_base }}/sabnzbd/config"
+      - "{{ docker_base }}/radarr/config"
+      - "{{ docker_base }}/sonarr/config"
+      - "{{ docker_base }}/prowlarr/config"
+      - "{{ docker_base }}/overseerr/config"
+      - "{{ docker_base }}/netvisor/daemon"
+      - "{{ docker_base }}/netvisor/server"
+      - "{{ docker_base }}/netvisor/postgres"
+
+    # Media directories
+    media_dirs:
+      - "{{ media_base }}/movies"
+      - "{{ media_base }}/tv"
+      - "{{ media_base }}/downloads/incomplete"
+      - "{{ media_base }}/downloads/complete"
+      - "{{ media_base }}/downloads/complete/movies"
+      - "{{ media_base }}/downloads/complete/tv"
+
+  tasks:
+    - name: Create container config directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ docker_uid }}"
+        group: "{{ docker_gid }}"
+        mode: "0755"
+      loop: "{{ container_config_dirs }}"
+
+    - name: Create media directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ docker_uid }}"
+        group: "{{ docker_gid }}"
+        mode: "0755"
+      loop: "{{ media_dirs }}"
+
+    - name: Display summary
+      ansible.builtin.debug:
+        msg: |
+          Created {{ container_config_dirs | length }} container config directories
+          Created {{ media_dirs | length }} media directories
+          All directories owned by UID:{{ docker_uid }} GID:{{ docker_gid }}

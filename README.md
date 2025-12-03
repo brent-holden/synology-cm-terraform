@@ -18,6 +18,7 @@ This project deploys a media automation stack and network monitoring tools on a 
 ## Prerequisites
 
 - Terraform >= 1.12.0
+- Ansible (for directory setup)
 - Synology NAS with DSM and Container Manager installed
 - A Synology user account with permissions to manage containers
 - Terraform Cloud account (configured for remote state)
@@ -78,26 +79,41 @@ terraform plan
 
 ### 6. Create Required Directories
 
-SSH into your Synology NAS and create the required directories before deploying. All containers use bind mounts, so these directories must exist.
+All containers use bind mounts, so the required directories must exist before deploying. Use the included Ansible playbook to create them automatically:
+
+```bash
+# Copy and configure the inventory (if needed)
+cp ansible/inventory.yml.example ansible/inventory.yml
+
+# Run the playbook
+ansible-playbook -i ansible/inventory.yml ansible/create-directories.yml
+```
+
+The playbook creates all directories with the correct ownership (UID 1027, GID 100) to match the container configurations.
+
+Alternatively, SSH into your Synology NAS and create the directories manually:
 
 ```bash
 # Container config directories
-mkdir -p /volume1/docker/sabnzbd/config
-mkdir -p /volume1/docker/radarr/config
-mkdir -p /volume1/docker/sonarr/config
-mkdir -p /volume1/docker/prowlarr/config
-mkdir -p /volume1/docker/overseerr/config
-mkdir -p /volume1/docker/netvisor/daemon
-mkdir -p /volume1/docker/netvisor/server
-mkdir -p /volume1/docker/netvisor/postgres
+sudo mkdir -p /volume1/docker/sabnzbd/config
+sudo mkdir -p /volume1/docker/radarr/config
+sudo mkdir -p /volume1/docker/sonarr/config
+sudo mkdir -p /volume1/docker/prowlarr/config
+sudo mkdir -p /volume1/docker/overseerr/config
+sudo mkdir -p /volume1/docker/netvisor/daemon
+sudo mkdir -p /volume1/docker/netvisor/server
+sudo mkdir -p /volume1/docker/netvisor/postgres
 
 # Media directories
-mkdir -p /volume1/media/movies
-mkdir -p /volume1/media/tv
-mkdir -p /volume1/media/downloads/incomplete
-mkdir -p /volume1/media/downloads/complete
-mkdir -p /volume1/media/downloads/complete/movies
-mkdir -p /volume1/media/downloads/complete/tv
+sudo mkdir -p /volume1/media/movies
+sudo mkdir -p /volume1/media/tv
+sudo mkdir -p /volume1/media/downloads/incomplete
+sudo mkdir -p /volume1/media/downloads/complete
+sudo mkdir -p /volume1/media/downloads/complete/movies
+sudo mkdir -p /volume1/media/downloads/complete/tv
+
+# Set ownership
+sudo chown -R 1027:100 /volume1/docker /volume1/media
 ```
 
 | Directory | Used By | Purpose |
@@ -159,13 +175,16 @@ Network monitoring stack with three components:
 
 ```
 .
-├── provider.tf      # Terraform and provider configuration
-├── overseerr.tf     # Overseerr container project
-├── prowlarr.tf      # Prowlarr container project
-├── radarr.tf        # Radarr container project
-├── sabnzbd.tf       # SABnzbd container project
-├── sonarr.tf        # Sonarr container project
-└── netvisor.tf      # Netvisor stack (daemon, server, postgres)
+├── provider.tf                        # Terraform and provider configuration
+├── overseerr.tf                       # Overseerr container project
+├── prowlarr.tf                        # Prowlarr container project
+├── radarr.tf                          # Radarr container project
+├── sabnzbd.tf                         # SABnzbd container project
+├── sonarr.tf                          # Sonarr container project
+├── netvisor.tf                        # Netvisor stack (daemon, server, postgres)
+└── ansible/
+    ├── create-directories.yml         # Playbook to create required directories
+    └── inventory.yml.example          # Example inventory file
 ```
 
 ## Troubleshooting
