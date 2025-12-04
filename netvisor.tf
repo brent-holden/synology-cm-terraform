@@ -123,7 +123,7 @@ resource "synology_container_project" "netvisor" {
         NETVISOR_DATABASE_URL          = "postgresql://postgres:password@postgres:5432/netvisor"
         NETVISOR_WEB_EXTERNAL_PATH     = "/app/static"
         NETVISOR_PUBLIC_URL            = "http://localhost:60072"
-        NETVISOR_INTEGRATED_DAEMON_URL = "http://172.17.0.1:60073"
+        NETVISOR_INTEGRATED_DAEMON_URL = "http://endurance.lan.eventide.network:60073"
       }
 
       depends_on = {
