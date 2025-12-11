@@ -65,19 +65,35 @@ provider "synology" {
 }
 ```
 
-### 4. Initialize Terraform
+### 4. Set Container Passwords
+
+The Netvisor stack requires a PostgreSQL password. Set it as an environment variable:
+
+```bash
+export TF_VAR_postgres_password="your-secure-password"
+```
+
+Or create a `terraform.tfvars` file (automatically gitignored):
+
+```hcl
+postgres_password = "your-secure-password"
+```
+
+Or configure it in Terraform Cloud as a sensitive variable.
+
+### 5. Initialize Terraform
 
 ```bash
 terraform init
 ```
 
-### 5. Review the Plan
+### 6. Review the Plan
 
 ```bash
 terraform plan
 ```
 
-### 6. Create Required Directories
+### 7. Create Required Directories
 
 All containers use bind mounts, so the required directories must exist before deploying. Use the included Ansible playbook to create them automatically:
 
@@ -133,7 +149,7 @@ sudo chown -R 1027:100 /volume1/docker /volume1/media
 | `/volume1/media/downloads/complete/movies` | Radarr | Completed movie downloads |
 | `/volume1/media/downloads/complete/tv` | Sonarr | Completed TV downloads |
 
-### 7. Apply the Configuration
+### 8. Apply the Configuration
 
 ```bash
 terraform apply
@@ -176,6 +192,7 @@ Network monitoring stack with three components:
 ```
 .
 ├── provider.tf                        # Terraform and provider configuration
+├── variables.tf                       # Sensitive variable definitions
 ├── overseerr.tf                       # Overseerr container project
 ├── prowlarr.tf                        # Prowlarr container project
 ├── radarr.tf                          # Radarr container project

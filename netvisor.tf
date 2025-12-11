@@ -79,7 +79,7 @@ resource "synology_container_project" "netvisor" {
       environment = {
         POSTGRES_DB       = "netvisor"
         POSTGRES_USER     = "postgres"
-        POSTGRES_PASSWORD = "password" # Change this to a secure password
+        POSTGRES_PASSWORD = var.postgres_password
       }
 
       healthcheck = {
@@ -120,7 +120,7 @@ resource "synology_container_project" "netvisor" {
         NETVISOR_LOG_LEVEL             = "info"
         NETVISOR_SERVER_PORT           = "60072"
         NETVISOR_DAEMON_PORT           = "60073"
-        NETVISOR_DATABASE_URL          = "postgresql://postgres:password@postgres:5432/netvisor"
+        NETVISOR_DATABASE_URL          = "postgresql://postgres:${var.postgres_password}@postgres:5432/netvisor"
         NETVISOR_WEB_EXTERNAL_PATH     = "/app/static"
         NETVISOR_PUBLIC_URL            = "http://localhost:60072"
         NETVISOR_INTEGRATED_DAEMON_URL = "http://endurance.lan.eventide.network:60073"
