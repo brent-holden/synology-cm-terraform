@@ -20,13 +20,6 @@
     # Container config directories
     container_config_dirs:
       - "{{ docker_base }}/sabnzbd/config"
-      - "{{ docker_base }}/radarr/config"
-      - "{{ docker_base }}/sonarr/config"
-      - "{{ docker_base }}/prowlarr/config"
-      - "{{ docker_base }}/overseerr/config"
-      - "{{ docker_base }}/netvisor/daemon"
-      - "{{ docker_base }}/netvisor/server"
-      - "{{ docker_base }}/netvisor/postgres"
 
     # Media directories
     media_dirs:
