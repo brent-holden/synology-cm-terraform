@@ -4,16 +4,11 @@ Terraform configuration for managing Docker containers on Synology DSM using the
 
 ## Overview
 
-This project deploys a media automation stack and network monitoring tools on a Synology NAS:
+This project deploys containers on a Synology NAS:
 
 | Service | Port | Description |
 |---------|------|-------------|
 | **SABnzbd** | 8080 | Usenet download client |
-| **Radarr** | 7878 | Movie collection manager |
-| **Sonarr** | 8989 | TV series collection manager |
-| **Prowlarr** | 9696 | Indexer manager for Radarr/Sonarr |
-| **Overseerr** | 5055 | Media request management |
-| **Netvisor** | 60072 | Network monitoring with daemon and PostgreSQL |
 
 ## Prerequisites
 
@@ -65,40 +60,24 @@ provider "synology" {
 }
 ```
 
-### 4. Set Container Passwords
-
-The Netvisor stack requires a PostgreSQL password. Set it as an environment variable:
-
-```bash
-export TF_VAR_postgres_password="your-secure-password"
-```
-
-Or create a `terraform.tfvars` file (automatically gitignored):
-
-```hcl
-postgres_password = "your-secure-password"
-```
-
-Or configure it in Terraform Cloud as a sensitive variable.
-
-### 5. Initialize Terraform
+### 4. Initialize Terraform
 
 ```bash
 terraform init
 ```
 
-### 6. Review the Plan
+### 5. Review the Plan
 
 ```bash
 terraform plan
 ```
 
-### 7. Create Required Directories
+### 6. Create Required Directories
 
 All containers use bind mounts, so the required directories must exist before deploying. Use the included Ansible playbook to create them automatically:
 
 ```bash
-# Copy and configure the inventory (if needed)
+# Copy and configure the inventory
 cp ansible/inventory.yml.example ansible/inventory.yml
 
 # Run the playbook
@@ -110,15 +89,8 @@ The playbook creates all directories with the correct ownership (UID 1027, GID 1
 Alternatively, SSH into your Synology NAS and create the directories manually:
 
 ```bash
-# Container config directories
+# Container config directory
 sudo mkdir -p /volume1/docker/sabnzbd/config
-sudo mkdir -p /volume1/docker/radarr/config
-sudo mkdir -p /volume1/docker/sonarr/config
-sudo mkdir -p /volume1/docker/prowlarr/config
-sudo mkdir -p /volume1/docker/overseerr/config
-sudo mkdir -p /volume1/docker/netvisor/daemon
-sudo mkdir -p /volume1/docker/netvisor/server
-sudo mkdir -p /volume1/docker/netvisor/postgres
 
 # Media directories
 sudo mkdir -p /volume1/media/movies
@@ -135,21 +107,14 @@ sudo chown -R 1027:100 /volume1/docker /volume1/media
 | Directory | Used By | Purpose |
 |-----------|---------|---------|
 | `/volume1/docker/sabnzbd/config` | SABnzbd | Application configuration |
-| `/volume1/docker/radarr/config` | Radarr | Application configuration |
-| `/volume1/docker/sonarr/config` | Sonarr | Application configuration |
-| `/volume1/docker/prowlarr/config` | Prowlarr | Application configuration |
-| `/volume1/docker/overseerr/config` | Overseerr | Application configuration |
-| `/volume1/docker/netvisor/daemon` | Netvisor Daemon | Daemon configuration |
-| `/volume1/docker/netvisor/server` | Netvisor Server | Server data |
-| `/volume1/docker/netvisor/postgres` | Netvisor PostgreSQL | Database files |
-| `/volume1/media/movies` | Radarr | Movie library |
-| `/volume1/media/tv` | Sonarr | TV series library |
+| `/volume1/media/movies` | Media library | Movie library |
+| `/volume1/media/tv` | Media library | TV series library |
 | `/volume1/media/downloads/incomplete` | SABnzbd | In-progress downloads |
 | `/volume1/media/downloads/complete` | SABnzbd | Completed downloads |
-| `/volume1/media/downloads/complete/movies` | Radarr | Completed movie downloads |
-| `/volume1/media/downloads/complete/tv` | Sonarr | Completed TV downloads |
+| `/volume1/media/downloads/complete/movies` | Media library | Completed movie downloads |
+| `/volume1/media/downloads/complete/tv` | Media library | Completed TV downloads |
 
-### 8. Apply the Configuration
+### 7. Apply the Configuration
 
 ```bash
 terraform apply
@@ -170,35 +135,13 @@ Adjust these values in each `.tf` file to match your Synology user/group IDs.
 
 All containers use bind mounts for persistent storage. The directories must exist on the NAS before deploying the containers.
 
-## Services
-
-### Media Stack
-
-- **SABnzbd**: Downloads from Usenet. Configure your Usenet provider and indexers after deployment.
-- **Prowlarr**: Manages indexers centrally and syncs with Radarr/Sonarr.
-- **Radarr**: Monitors and downloads movies automatically.
-- **Sonarr**: Monitors and downloads TV series automatically.
-- **Overseerr**: Provides a user-friendly interface for requesting media.
-
-### Netvisor
-
-Network monitoring stack with three components:
-- **Daemon**: Runs in host network mode for network discovery (port 60073)
-- **Server**: Web application interface (port 60072)
-- **PostgreSQL**: Database backend
-
 ## File Structure
 
 ```
 .
 ├── provider.tf                        # Terraform and provider configuration
-├── variables.tf                       # Sensitive variable definitions
-├── overseerr.tf                       # Overseerr container project
-├── prowlarr.tf                        # Prowlarr container project
-├── radarr.tf                          # Radarr container project
+├── variables.tf                       # Variable definitions
 ├── sabnzbd.tf                         # SABnzbd container project
-├── sonarr.tf                          # Sonarr container project
-├── netvisor.tf                        # Netvisor stack (daemon, server, postgres)
 └── ansible/
     ├── create-directories.yml         # Playbook to create required directories
     └── inventory.yml.example          # Example inventory file
