@@ -22,7 +22,7 @@ terraform {
 
 # Configure the Synology provider with DSM connection details
 provider "synology" {
-  host     = "https://endurance.lan.eventide.network:5001" 
+  host     = "https://endurance.jackal-in.ts.net:5001" 
   user     = "brent"
   skip_cert_check    = true
 }
