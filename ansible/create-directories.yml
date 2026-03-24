@@ -20,9 +20,6 @@
     # Container config directories
     container_config_dirs:
       - "{{ docker_base }}/sabnzbd/config"
-      - "{{ docker_base }}/fileflows/data"
-      - "{{ docker_base }}/fileflows/logs"
-      - "{{ docker_base }}/fileflows/temp"
 
     # Media directories
     media_dirs:
