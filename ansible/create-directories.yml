@@ -21,6 +21,16 @@
     container_config_dirs:
       - "{{ docker_base }}/sabnzbd/config"
 
+    # Consul directories (root-owned)
+    consul_dirs:
+      - "{{ docker_base }}/consul/config"
+      - "{{ docker_base }}/consul/data"
+
+    # Nomad directories (root-owned, separate from media containers)
+    nomad_dirs:
+      - "{{ docker_base }}/nomad/config"
+      - "{{ docker_base }}/nomad/data"
+
     # Media directories
     media_dirs:
       - "{{ media_base }}/movies"
@@ -72,6 +82,40 @@
         mode: "0755"
       loop: "{{ media_dirs }}"
 
+    - name: Create Consul directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+      loop: "{{ consul_dirs }}"
+
+    - name: Create Nomad directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+      loop: "{{ nomad_dirs }}"
+
+    - name: Deploy Consul server configuration
+      ansible.builtin.copy:
+        src: files/consul-server.hcl
+        dest: "{{ docker_base }}/consul/config/consul.hcl"
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: Deploy Nomad server configuration
+      ansible.builtin.copy:
+        src: files/nomad-server.hcl
+        dest: "{{ docker_base }}/nomad/config/nomad.hcl"
+        owner: root
+        group: root
+        mode: "0644"
+
     - name: Display summary
       ansible.builtin.debug:
         msg: |
@@ -80,4 +124,8 @@
           User '{{ plex_user }}' is a member of groups: {{ media_group }}, docker, users
           Created {{ container_config_dirs | length }} container config directories
           Created {{ media_dirs | length }} media directories
-          All directories owned by {{ plex_user }}:{{ media_group }}
+          Created {{ consul_dirs | length }} Consul directories (root-owned)
+          Created {{ nomad_dirs | length }} Nomad directories (root-owned)
+          Deployed Consul server config to {{ docker_base }}/consul/config/consul.hcl
+          Deployed Nomad server config to {{ docker_base }}/nomad/config/nomad.hcl
+          All media directories owned by {{ plex_user }}:{{ media_group }}
